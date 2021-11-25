@@ -156,7 +156,7 @@ def abstract_network(init_pmids, toolname=None, email=None, depth=1, search_term
 			
 if __name__ == '__main__':
 	toolname = 'ahl27litreview'
-	email = 'pmcsearch@ahl27.com'
+	email = 'a@gmail.com'
 	init_pmids = ['24349035']
 	search_terms = [['coevolution', 'coevolutionary', 'cooccurence'],
 								['phylogenetic', 'profile', 'phylogeny', 'mirrortree', 'contexttree']]
