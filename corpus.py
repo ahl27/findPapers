@@ -82,7 +82,7 @@ class Corpus:
 if __name__ == '__main__':
 	from citation_network import abstract_network
 	toolname = 'ahl27litreview'
-	email = 'pmcsearch@ahl27.com'
+	email = 'a@gmail.com'
 	init_pmids = ['24349035']
 	terms = [['coevolution', 'coevolutionary', 'cooccurence'],
 								['phylogenetic', 'profile', 'phylogeny', 'mirrortree', 'contexttree']]
