@@ -1,6 +1,8 @@
 ## Running the Script
 
 Run this script with `python3 main.py`.
+This script is implemented almost entirely in base Python3.
+Only dependencies should be numpy and Python >= 3.7.
 
 See definition of user parameters below.
 
