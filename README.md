@@ -8,7 +8,11 @@ See definition of user parameters below.
 
 NCBI enforces an API access limit of 3 requests/second, which is the main speed bottleneck. 
 This script queries at a rate of approximately 7,000 calls per hour. I might go back and make it more 
-efficient later, but this is pretty close to the ideal limit of 10,800 calls per hour. 
+efficient later, but this is pretty close to the ideal limit of 10,800 calls per hour.
+
+You can generate an API key from your account on NCBI, and use this in the `api_key` argument. 
+This is supposed to increase the limit to 10 requests/second, which should improve processing time.
+Even with this, though, my rate is still roughly 2 abstracts processed per second.
 
 Tested and working on Pythonista 3 for iPad. 
 
@@ -23,6 +27,8 @@ toolname = 'ahl27litreview'
 email = 'example@example.com'
 
 init_pmids = ['24349035']
+
+api_key = None
 
 outfile_name = 'filesfound.txt'
 
@@ -39,7 +45,7 @@ terms = [['coevolution', 'coevolutionary', 'cooccurence'], ['phylogenetic', 'pro
 
 Required params to use NCBI API:
 
-* toolname: name of tool, set it to some random string. 
+* toolname: name of tool, set it to some string corresponding with your project. 
   * ex. `'alakshmantool’`
 * email: email address for contacting if there's a problem.
   * ex. `'a@gmail.com'`
@@ -48,10 +54,16 @@ Required params to use NCBI API:
   * If only using a single ID, still put it into a list (like `['1']`)
   * ex. `['001', '002', '003']`
 
+Note that if you do not provide an email and toolname your requests may be blocked. Supplying an
+invalid email address will mean NCBI cannot contact you if there's a problem, and can result in
+your IP address being blacklisted from using any NCBI API commands.
+
 Additional parameters:
 
-*  verbose: `True` to print out progress, `False` to suppress most output 
-   * default: `True`
+* verbose: `True` to print out progress, `False` to suppress most output 
+  * default: `True`
+* api_key: Input your API key as a string, or use `None` if you don't have one.
+  * ex. `None` or `'123456789abcdef'`
 * outfile_name: file to save results to. Set to `None` to print out output instead of saving.
   * ex. `fileout.txt` or `None`
 * depth: How far into the network to go. 
