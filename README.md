@@ -1,16 +1,18 @@
 ## Running the Script
 
-Run this script with `python3 main.py`
+Run this script with `python3 main.py`.
 
-See definition of user parameters below
+See definition of user parameters below.
 
 ## User Parameters
 
-##### Example usage:
+Parameters are defined within `main.py`.
 
+##### Example usage:
+```
 toolname = 'ahl27litreview'
 
-email = 'pmcsearch@ahl27.com'
+email = 'example@example.com'
 
 init_pmids = ['24349035']
 
@@ -20,9 +22,8 @@ depth = 1
 
 nclust = 2
 
-terms = [['coevolution', 'coevolutionary', 'cooccurence'],
-
-					['phylogenetic', 'profile', 'phylogeny', 'mirrortree', 'contexttree']]
+terms = [['coevolution', 'coevolutionary', 'cooccurence'], ['phylogenetic', 'profile', 'phylogeny', 'mirrortree', 'contexttree']]
+```
 
 ##### Explanations:
 
@@ -34,24 +35,24 @@ Required params to use NCBI API:
   * ex. 'a@gmail.com'
 * init_pmids: PubMed IDs to build a network from, as a comma separated list of numbers. 
   * Should be fine as strings or integers. 
-  * If only using a single ID, still put it into a list (like ['1'])
-  * ex. ['001', '002', '003']
+  * If only using a single ID, still put it into a list (like `['1']`)
+  * ex. `['001', '002', '003']`
 
 Additional parameters:
 
-*  verbose: True to print out progress, False to suppress most output 
-  * default: True
+*  verbose: `True` to print out progress, `False` to suppress most output 
+  * default: `True`
 * depth: How far into the network to go. 
-  * ex. 3
+  * ex. `3`
   * Depth=n means that all papers returned will be within n distance from at least one paper in init_pmids. A paper that cites or is cited by a given paper are distance 1 away from each other.
   * CAUTION: The number of papers returned grows incredibly rapidly with depth. The example returns 35 papers at depth 1, and \~32,000 at depth 2.
 * nclust: Number of clusters to cluster into.
-  * ex. 3 
+  * ex. `3` 
 * terms: Search terms, organized as a list of lists. 
   * Within each nested list, the abstract must contain at least one word from it.
-  * The format is essentially: [ [1, 2], [3, 4] ] => (1 OR 2) AND (3 OR 4)
-  * Leave empty ( [] ) to just grab everything.
-  * ex. [['streptomyces', 'pseudomonas'], ['antibiotics']]
+  * The format is essentially: `[ [1, 2], [3, 4] ]` => (1 OR 2) AND (3 OR 4)
+  * Leave empty ( `[]` ) to just grab everything.
+  * ex. `[['streptomyces', 'pseudomonas'], ['antibiotics']]`
     * This returns abstracts that include both 'antibiotics' and at least one term from (streptomyces, pseudomonas)
 
 ## Example Output:
