@@ -18,6 +18,8 @@ email = 'example@example.com'
 
 init_pmids = ['24349035']
 
+outfile_name = 'filesfound.txt'
+
 verbose = True
 
 depth = 1
@@ -43,7 +45,9 @@ Required params to use NCBI API:
 Additional parameters:
 
 *  verbose: `True` to print out progress, `False` to suppress most output 
-  * default: `True`
+   * default: `True`
+* outfile_name: file to save results to. Set to `None` to print out output instead of saving.
+  * ex. `fileout.txt` or `None`
 * depth: How far into the network to go. 
   * ex. `3`
   * Depth=n means that all papers returned will be within n distance from at least one paper in init_pmids. A paper that cites or is cited by a given paper are distance 1 away from each other.
