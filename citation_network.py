@@ -79,18 +79,24 @@ def tokenize_abstract(abstract):
 def get_unique_wordslist(list_of_abstracts):
 	res = {x for i in list_of_abstracts for x in i}	
 
-def print_progress_bar(k, maxk, barwidth=25, forcesame=False):
+def print_progress_bar(k, maxk, barwidth=25, forcesame=False, time_per_k = 0.5):
+	# 0.5 is about how fast it can compute based on my machine
+	# at the end of the day it's really just an estimate
 	if k == 0 and not forcesame:
 			print('[' + (' '*barwidth) + '] (0/' + str(maxk) + ')', end='')
 	else:
 		num_bars = int((k/maxk) * barwidth)
 		prog = '=' * num_bars
 		spacer = ' ' * (barwidth - num_bars)
-		print('\r' + '[' + prog + spacer + '] (' + str(k) + '/' + str(maxk) + ')', end='')
+		remaining_sec = int((maxk - k) * time_per_k + 0.5)
+		remaining_hr = remaining_sec // 3600
+		remaining_min = (remaining_sec % 3600) // 60
+		remaining_sec = remaining_sec % 60
+		timestring = "{hr}:{min:02d}:{sec:02d}".format(hr=remaining_hr, min=remaining_min, sec=remaining_sec)
+		print('\r' + '[' + prog + spacer + '] (' + str(k) + '/' + str(maxk) + ', ' + timestring + ')', end='')
 	
 	if k == maxk:
-		print()
-		
+		print()		
 	
 def gen_paper_network(pmids, toolname, email, depth=1, verbose=True):
 	network = {}
