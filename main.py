@@ -7,10 +7,11 @@ from corpus import Corpus
 
 ###### USER PARAMETERS #####
 toolname = 'ahl27litreview'
-email = 'a@gmail.com'
+email = 'pmcsearch@ahl27.com'
 init_pmids = ['24349035']
 verbose = True
-outfile_name = None
+outfile_name = None #'papersfound.txt'
+api_key = None
 depth = 1
 nclust = 2
 terms = [['coevolution', 'coevolutionary', 'cooccurence'],
@@ -33,14 +34,15 @@ terms = [['coevolution', 'coevolutionary', 'cooccurence'],
 # * verbose:		True to print out progress, False to suppress most output 
 #									- (default True)
 #
-# * outfile_name:	Name of file to save result to. Set to None to print out results instead of saving.
-#
 # * depth:			How far into the network to go. Depth=n means that all papers returned 
 #								will be within n distance from at least one paper in init_pmids. A paper 
 #								that cites or is cited by a given paper are distance 1 away from each other.
 #									- ex. 3
 # 								-	CAUTION: The number of papers returned grows incredibly rapidly with depth. 
 # 				 								The example returns 35 papers at depth 1, and ~32,000 at depth 2.
+#
+# * apikey:			Generated from your NCBI account. Using an apikey supposedly increases limit to 10 requests/sec.
+#				- ex. `None` if you don't have a key, else `'abcde123456'`
 #
 # * nclust:			Number of clusters to cluster into.
 #									- ex. 3 
@@ -81,7 +83,7 @@ if __name__ == '__main__':
 	print('\nThanks for using my tool!')
 	print('*'*40)
 	print()			
-	abstracts = abstract_network(init_pmids, toolname, email, depth=depth, search_terms=terms, verbose=verbose)
+	abstracts = abstract_network(init_pmids, toolname, email, apikey=api_key, depth=depth, search_terms=terms, verbose=verbose)
 	documents = Corpus(abstracts)
 	print('\n' + str(len(documents.documents)) + ' total abstracts matched search criteria.\n')
 	print('Clustering with k-means (k=' + str(nclust) + ')...')
@@ -90,7 +92,6 @@ if __name__ == '__main__':
 	for i in range(len(documents.documents)):
 		documents.documents[i].set_cluster(model.predict(documents.dataset[i]))
 	print('*'*40)
-	clust = interpret_cluster(documents)
 	clust = interpret_cluster(documents)
 	if outfile_name is not None:
 		with open(outfile_name, 'w') as f:
