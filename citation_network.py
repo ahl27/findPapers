@@ -4,10 +4,12 @@ import re
 from time import sleep
 from stopwords import stopwords
 
-def find_citing_articles(pmid, toolname, email, return_pmids=True, use_pmcid=False):
+def find_citing_articles(pmid, toolname, email, apikey, return_pmids=True, use_pmcid=False):
 	# By default returns a list of PMIDs that cite the given article in PubMed
 	params = {'id': pmid, 'tool': toolname, 'email': email,
 						'linkname': 'pubmed_pmc_refs', 'dbfrom': 'pubmed'}
+	if apikey is not None:
+		params['api_key'] = apikey
 	if (return_pmids):
 		params['linkname'] = 'pubmed_pubmed_citedin'
 	elif (use_pmcid):
@@ -16,11 +18,12 @@ def find_citing_articles(pmid, toolname, email, return_pmids=True, use_pmcid=Fal
 	return(make_request(params))
 
 
-def find_cited_articles(pmid, toolname, email, pmc_refs_only=False, id_by_pmid=True):
+def find_cited_articles(pmid, toolname, email, apikey, pmc_refs_only=False, id_by_pmid=True):
 	# Returns a list of all articles cited by the article
 	params = {'id': pmid, 'tool': toolname, 'email': email,
 						'linkname': 'pmc_refs_pubmed', 'dbfrom': 'pmc'}
-		
+	if apikey is not None:
+		params['api_key'] = apikey
 	if (pmc_refs_only):
 		params['linkname'] = 'pmc_pmc_cites'
 	elif (id_by_pmid):
@@ -35,8 +38,9 @@ def make_request(params):
 	r = requests.get(request, params=params)
 	
 	# Only 3 requests are allowed per second, delay if we're sending too many
+	# Using an API key supposedly increases the limit to 10/sec
 	while r.status_code != 200:
-		sleep(1)
+		sleep(0.33)
 		r = requests.get(request, params=params)
 	ids = []
 	parsed = xmltodict.parse(r.text)
@@ -54,13 +58,15 @@ def make_request(params):
 	return(ids)
 	
 
-def get_abstract(id, toolname, email):
+def get_abstract(id, toolname, email, apikey):
 	request = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi'
 	params = {'db': 'pubmed', 'id': id, 'tool': toolname, 'email': email,
 						'retmode': 'JSON', 'rettype': 'abstract'}
+	if apikey is not None:
+		params['api_key'] = apikey
 	r = requests.get(request, params=params)
 	while r.status_code != 200:
-		sleep(1)
+		sleep(0.33)
 		r = requests.get(request, params=params)
 	r = r.text
 	r = r.split('\n\n')[4]
@@ -75,11 +81,8 @@ def tokenize_abstract(abstract):
 	tokens = [word for word in tokens if word not in stopwords]
 
 	return(tokens)
-	
-def get_unique_wordslist(list_of_abstracts):
-	res = {x for i in list_of_abstracts for x in i}	
 
-def print_progress_bar(k, maxk, barwidth=25, forcesame=False, time_per_k = 0.5):
+def print_progress_bar(k, maxk, barwidth=25, forcesame=False, time_per_k = 0.45):
 	# 0.5 is about how fast it can compute based on my machine
 	# at the end of the day it's really just an estimate
 	if k == 0 and not forcesame:
@@ -96,9 +99,10 @@ def print_progress_bar(k, maxk, barwidth=25, forcesame=False, time_per_k = 0.5):
 		print('\r' + '[' + prog + spacer + '] (' + str(k) + '/' + str(maxk) + ', ' + timestring + ')', end='')
 	
 	if k == maxk:
-		print()		
+		print()
+		
 	
-def gen_paper_network(pmids, toolname, email, depth=1, verbose=True):
+def gen_paper_network(pmids, toolname, email, apikey, depth, verbose=True):
 	network = {}
 	temp = pmids
 	all_pmids = set(pmids)
@@ -113,7 +117,7 @@ def gen_paper_network(pmids, toolname, email, depth=1, verbose=True):
 			k = 0
 			print_progress_bar(0, num_elements)
 		for item in cur: 
-			temp = temp + find_citing_articles(item, toolname, email) + find_cited_articles(item, toolname, email)
+			temp = temp + find_citing_articles(item, toolname, email, apikey) + find_cited_articles(item, toolname, email, apikey)
 			all_pmids.update(temp)
 			if verbose:
 				k += 1 
@@ -121,14 +125,14 @@ def gen_paper_network(pmids, toolname, email, depth=1, verbose=True):
 				
 	return(list(all_pmids))
 	
-def abstracts_from_network(network, toolname, email, terms, verbose=True):
+def abstracts_from_network(network, toolname, email, apikey, terms, verbose=True):
 	abstracts = {}
 	maxlen = len(network)
 	if verbose:
 		print_progress_bar(0, maxlen)
 		k = 0
 	for item in network:
-		abstract = get_abstract(item, toolname, email)
+		abstract = get_abstract(item, toolname, email, apikey)
 		flag = True
 		if terms is not []:
 			flag = find_search_terms(abstract, terms)
@@ -146,25 +150,26 @@ def find_search_terms(corpus, terms):
 		state = state and any([term in corpus for term in term_list])
 	return(state)
 
-def abstract_network(init_pmids, toolname=None, email=None, depth=1, search_terms=[], verbose=True):
+def abstract_network(init_pmids, toolname=None, email=None, apikey=None, depth=1, search_terms=[], verbose=True):
 	if any(i is None for i in [toolname, email]):
 		raise Exception("Tool and Email name must be specified")
 	if verbose:
 		print("Finding papers from initial paper(s)...")
-	network = gen_paper_network(init_pmids, toolname, email, depth, verbose)
+	network = gen_paper_network(init_pmids, toolname, email, apikey, depth, verbose)
 	if verbose:
 		print(str(len(network)) + " papers found.\n")
 		print("Finding abstracts...")
-	abstracts = abstracts_from_network(network, toolname, email, search_terms, verbose)
+	abstracts = abstracts_from_network(network, toolname, email, apikey, search_terms, verbose)
 	
 	return(abstracts)
 		
 			
 if __name__ == '__main__':
 	toolname = 'ahl27litreview'
-	email = 'a@gmail.com'
+	email = 'pmcsearch@ahl27.com'
+	apikey = None
 	init_pmids = ['24349035']
 	search_terms = [['coevolution', 'coevolutionary', 'cooccurence'],
 								['phylogenetic', 'profile', 'phylogeny', 'mirrortree', 'contexttree']]
 		
-	print(abstract_network(init_pmids, toolname, email, search_terms=search_terms))
+	print(abstract_network(init_pmids, toolname, email, apikey, search_terms=search_terms))
