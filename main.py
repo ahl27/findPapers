@@ -10,6 +10,7 @@ toolname = 'ahl27litreview'
 email = 'a@gmail.com'
 init_pmids = ['24349035']
 verbose = True
+outfile_name = None
 depth = 1
 nclust = 2
 terms = [['coevolution', 'coevolutionary', 'cooccurence'],
@@ -31,6 +32,8 @@ terms = [['coevolution', 'coevolutionary', 'cooccurence'],
 #
 # * verbose:		True to print out progress, False to suppress most output 
 #									- (default True)
+#
+# * outfile_name:	Name of file to save result to. Set to None to print out results instead of saving.
 #
 # * depth:			How far into the network to go. Depth=n means that all papers returned 
 #								will be within n distance from at least one paper in init_pmids. A paper 
@@ -69,6 +72,8 @@ if __name__ == '__main__':
 	print('\t- init_pmids: ' + str([int(i) for i in init_pmids]))
 	print('\t- depth: ' + str(depth))
 	print('\t- nclust: ' + str(nclust))
+	if outfile_name is not None:
+		print('\t- outfile: ' + outfile_name)
 	if terms != []:
 		search_str = [' OR '.join(i) for i in terms]
 		search_str = '(' + ') AND ('.join(search_str) + ')'
@@ -85,8 +90,17 @@ if __name__ == '__main__':
 	for i in range(len(documents.documents)):
 		documents.documents[i].set_cluster(model.predict(documents.dataset[i]))
 	print('*'*40)
-	print('\nClusters found:\n')
 	clust = interpret_cluster(documents)
-	for key, value in clust.items():
-		print("Cluster " + str(key+1) + ' (' + str(len(value)) + ' items): ' + str([int(i) for i in value]))
-		print()
+	clust = interpret_cluster(documents)
+	if outfile_name is not None:
+		with open(outfile_name, 'w') as f:
+			for key, value in clust.items():
+				str_data = "Cluster " + str(key+1) + ' (' + str(len(value)) + ' items): ' + str([int(i) for i in value]) + '\n\n'
+				f.write(str_data)
+			print('Wrote data to file: ' + outfile_name)
+	else:
+		print('\nClusters found:\n')
+		for key, value in clust.items():
+			str_data = "Cluster " + str(key+1) + ' (' + str(len(value)) + ' items): ' + str([int(i) for i in value])
+			print(str_data)
+			print()
