@@ -6,6 +6,12 @@ Only dependencies should be numpy and Python >= 3.7.
 
 See definition of user parameters below.
 
+NCBI enforces an API access limit of 3 requests/second, which is the main speed bottleneck. 
+This script queries at a rate of approximately 7,000 calls per hour. I might go back and make it more 
+efficient later, but this is pretty close to the ideal limit of 10,800 calls per hour. 
+
+Tested and working on Pythonista 3 for iPad. 
+
 ## User Parameters
 
 Parameters are defined within `main.py`.
@@ -34,9 +40,9 @@ terms = [['coevolution', 'coevolutionary', 'cooccurence'], ['phylogenetic', 'pro
 Required params to use NCBI API:
 
 * toolname: name of tool, set it to some random string. 
-  * ex. 'alakshmantool’
+  * ex. `'alakshmantool’`
 * email: email address for contacting if there's a problem.
-  * ex. 'a@gmail.com'
+  * ex. `'a@gmail.com'`
 * init_pmids: PubMed IDs to build a network from, as a comma separated list of numbers. 
   * Should be fine as strings or integers. 
   * If only using a single ID, still put it into a list (like `['1']`)
@@ -58,6 +64,8 @@ Additional parameters:
   * Within each nested list, the abstract must contain at least one word from it.
   * The format is essentially: `[ [1, 2], [3, 4] ]` => (1 OR 2) AND (3 OR 4)
   * Leave empty ( `[]` ) to just grab everything.
+  * only use lowercase letters--abstract is lowercased before it's filtered. Additionally, hyphens are removed. 
+    * "Co-Evolution" becomes "coevolution"
   * ex. `[['streptomyces', 'pseudomonas'], ['antibiotics']]`
     * This returns abstracts that include both 'antibiotics' and at least one term from (streptomyces, pseudomonas)
 
