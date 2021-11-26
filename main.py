@@ -1,5 +1,5 @@
 from kmeans import KMeans
-from citation_network import abstract_network
+from citation_network import gen_paper_network
 from corpus import Corpus
 
 # Run this script with `python3 main.py`
