@@ -108,10 +108,10 @@ def gen_paper_network(pmids, toolname, email, terms, apikey=None, depth=1, verbo
 	if any(i is None for i in [toolname, email]):
 		raise Exception("Tool and Email name must be specified")
 	if verbose:
-		print("Finding papers from initial paper(s)...")
-	network = {}
+		print("Finding papers from initial paper(s)...\n")
+		print('Gathering initial papers (' + str(len(pmids)) + ' to search)')
+	network = abstracts_from_network(pmids, toolname, email, terms, apikey, verbose)
 	temp = pmids
-	all_pmids = set(pmids)
 	
 	for j in range(1,(depth+1)):
 		print("\nSearch depth of " + str(j))
@@ -127,14 +127,16 @@ def gen_paper_network(pmids, toolname, email, terms, apikey=None, depth=1, verbo
 			if verbose:
 				k += 1 
 				print_progress_bar(k, num_elements)
+		temp = list(set([paperid for paperid in temp if paperid not in network.keys()]))
 		if verbose:
 			print(str(len(temp)) + " papers found.\n")
-			print("Filtering abstracts by search terms...")
+			print("Finding abstracts...")
 		abstracts = abstracts_from_network(temp, toolname, email, terms, apikey, verbose)
 		if verbose:
-			print(str(len(abstracts.keys())) + " papers met criteria.\n")
+			print(str(len(abstracts.keys())) + " papers met search criteria.\n")
 		temp = list(abstracts.keys())
-		all_pmids.update(temp)
+		if temp is []:
+			break
 		network.update(abstracts)
 				
 	return(network)
