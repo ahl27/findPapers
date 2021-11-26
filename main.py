@@ -7,7 +7,7 @@ from corpus import Corpus
 
 ###### USER PARAMETERS #####
 toolname = 'ahl27litreview'
-email = 'pmcsearch@ahl27.com'
+email = 'example@example.com'
 init_pmids = ['24349035']
 verbose = True
 outfile_name = None #'papersfound.txt'
