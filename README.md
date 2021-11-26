@@ -69,7 +69,8 @@ Additional parameters:
 * depth: How far into the network to go. 
   * ex. `3`
   * Depth=n means that all papers returned will be within n distance from at least one paper in init_pmids. A paper that cites or is cited by a given paper are distance 1 away from each other.
-  * CAUTION: The number of papers returned grows incredibly rapidly with depth. The example returns 35 papers at depth 1, and \~32,000 at depth 2.
+  * Papers are filtered by search term before expanding to a new depth. 
+  * CAUTION: The number of papers returned grows rapidly with depth. The example returns 35 papers at depth 1, and 750 at depth 2.
 * nclust: Number of clusters to cluster into.
   * ex. `3` 
 * terms: Search terms, organized as a list of lists. 
