@@ -83,7 +83,7 @@ if __name__ == '__main__':
 	print('\nThanks for using my tool!')
 	print('*'*40)
 	print()			
-	abstracts = abstract_network(init_pmids, toolname, email, apikey=api_key, depth=depth, search_terms=terms, verbose=verbose)
+	abstracts = gen_paper_network(init_pmids, toolname, email, apikey=api_key, depth=depth, terms=terms, verbose=verbose)
 	documents = Corpus(abstracts)
 	print('\n' + str(len(documents.documents)) + ' total abstracts matched search criteria.\n')
 	print('Clustering with k-means (k=' + str(nclust) + ')...')
