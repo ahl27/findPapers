@@ -4,10 +4,12 @@ import re
 from time import sleep
 from stopwords import stopwords
 
-def find_citing_articles(pmid, toolname, email, return_pmids=True, use_pmcid=False):
+def find_citing_articles(pmid, toolname, email, apikey, return_pmids=True, use_pmcid=False):
 	# By default returns a list of PMIDs that cite the given article in PubMed
 	params = {'id': pmid, 'tool': toolname, 'email': email,
 						'linkname': 'pubmed_pmc_refs', 'dbfrom': 'pubmed'}
+	if apikey is not None:
+		params['api_key'] = apikey
 	if (return_pmids):
 		params['linkname'] = 'pubmed_pubmed_citedin'
 	elif (use_pmcid):
@@ -16,11 +18,12 @@ def find_citing_articles(pmid, toolname, email, return_pmids=True, use_pmcid=Fal
 	return(make_request(params))
 
 
-def find_cited_articles(pmid, toolname, email, pmc_refs_only=False, id_by_pmid=True):
+def find_cited_articles(pmid, toolname, email, apikey, pmc_refs_only=False, id_by_pmid=True):
 	# Returns a list of all articles cited by the article
 	params = {'id': pmid, 'tool': toolname, 'email': email,
 						'linkname': 'pmc_refs_pubmed', 'dbfrom': 'pmc'}
-		
+	if apikey is not None:
+		params['api_key'] = apikey
 	if (pmc_refs_only):
 		params['linkname'] = 'pmc_pmc_cites'
 	elif (id_by_pmid):
@@ -54,10 +57,12 @@ def make_request(params):
 	return(ids)
 	
 
-def get_abstract(id, toolname, email):
+def get_abstract(id, toolname, email, apikey):
 	request = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi'
 	params = {'db': 'pubmed', 'id': id, 'tool': toolname, 'email': email,
 						'retmode': 'JSON', 'rettype': 'abstract'}
+	if apikey is not None:
+		params['api_key'] = apikey
 	r = requests.get(request, params=params)
 	while r.status_code != 200:
 		sleep(1)
@@ -99,7 +104,7 @@ def print_progress_bar(k, maxk, barwidth=25, forcesame=False, time_per_k = 0.5):
 		print()
 		
 	
-def gen_paper_network(pmids, toolname, email, terms, depth=1, verbose=True):
+def gen_paper_network(pmids, toolname, email, terms, apikey=None, depth=1, verbose=True):
 	if any(i is None for i in [toolname, email]):
 		raise Exception("Tool and Email name must be specified")
 	if verbose:
@@ -118,14 +123,14 @@ def gen_paper_network(pmids, toolname, email, terms, depth=1, verbose=True):
 			k = 0
 			print_progress_bar(0, num_elements)
 		for item in cur: 
-			temp = temp + find_citing_articles(item, toolname, email) + find_cited_articles(item, toolname, email)
+			temp = temp + find_citing_articles(item, toolname, email, apikey) + find_cited_articles(item, toolname, email, apikey)
 			if verbose:
 				k += 1 
 				print_progress_bar(k, num_elements)
 		if verbose:
 			print(str(len(temp)) + " papers found.\n")
 			print("Filtering abstracts by search terms...")
-		abstracts = abstracts_from_network(temp, toolname, email, terms, verbose)
+		abstracts = abstracts_from_network(temp, toolname, email, terms, apikey, verbose)
 		if verbose:
 			print(str(len(abstracts.keys())) + " papers met criteria.\n")
 		temp = list(abstracts.keys())
@@ -134,14 +139,14 @@ def gen_paper_network(pmids, toolname, email, terms, depth=1, verbose=True):
 				
 	return(network)
 	
-def abstracts_from_network(network, toolname, email, terms, verbose=True):
+def abstracts_from_network(network, toolname, email, terms, apikey, verbose=True):
 	abstracts = {}
 	maxlen = len(network)
 	if verbose:
 		print_progress_bar(0, maxlen)
 		k = 0
 	for item in network:
-		abstract = get_abstract(item, toolname, email)
+		abstract = get_abstract(item, toolname, email, apikey)
 		flag = True
 		if terms is not []:
 			flag = find_search_terms(abstract, terms)
